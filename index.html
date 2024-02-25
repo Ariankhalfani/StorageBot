@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chatbot Interface</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 20px;
+            color: #333;
+        }
+
+        #chat-container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #chat-history {
+            height: 300px;
+            overflow-y: scroll;
+            padding-bottom: 10px;
+        }
+
+        #chat-history p {
+            margin: 5px 0;
+        }
+
+        #chat-form {
+            display: flex;
+        }
+
+        #user-input {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+
+        #user-input:focus {
+            outline: none;
+            border-color: #66afe9;
+        }
+
+        #send-button {
+            padding: 8px 16px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        #send-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Chatbot Interface</h1>
+    <div id="chat-container">
+        <div id="chat-history"></div>
+        <form id="chat-form">
+            <input type="text" id="user-input" placeholder="Type your message...">
+            <button type="submit" id="send-button">Send</button>
+        </form>
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const chatHistory = document.getElementById("chat-history");
+            const chatForm = document.getElementById("chat-form");
+            const userInput = document.getElementById("user-input");
+
+            chatForm.addEventListener("submit", function(event) {
+                event.preventDefault();
+                const userMessage = userInput.value.trim();
+                if (userMessage === "") return;
+
+                appendMessage("You", userMessage);
+                userInput.value = ""; // Clear input field
+
+                fetch("/get_response", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded"
+                    },
+                    body: `prompt=${encodeURIComponent(userMessage)}`
+                })
+                .then(response => response.text())
+                .then(data => {
+                    appendMessage("Chatbot", data);
+                    chatHistory.scrollTop = chatHistory.scrollHeight; // Scroll to bottom
+                })
+                .catch(error => console.error("Error:", error));
+            });
+
+            function appendMessage(sender, message) {
+                const messageElement = document.createElement("p");
+                messageElement.textContent = `${sender}: ${message}`;
+                chatHistory.appendChild(messageElement);
+            }
+        });
+    </script>
+</body>
+</html>
