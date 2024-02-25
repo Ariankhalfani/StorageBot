@@ -7,14 +7,14 @@ from transformers import T5ForConditionalGeneration, T5Tokenizer
 app = Flask(__name__)
 
 # Load pre-trained model and tokenizer
-model_path = "t5_model_epoch_20.pt"  # Path to your pre-trained model
+model_path = "t5_model_epoch_40.pt"  # Path to your pre-trained model
 tokenizer_path = "t5_tokenizer"  # Path to your tokenizer
 model = T5ForConditionalGeneration.from_pretrained(model_path)
 tokenizer = T5Tokenizer.from_pretrained(tokenizer_path)
 
 @app.route('/')
 def home():
-    return render_template('index.html')
+    return render_template('index2.html')  # Render the index.html template
 
 @app.route('/get_response', methods=['POST'])
 def get_response():
@@ -31,3 +31,4 @@ def get_response():
 
 if __name__ == '__main__':
     app.run(debug=True)
+    
