@@ -1,34 +1,26 @@
-# app.py
+import os
+import google.generativeai as genai
 
-from flask import Flask, render_template, request
-import torch
-from transformers import T5ForConditionalGeneration, T5Tokenizer
+# Set the environment variable for your API key
+os.environ['GOOGLE_API_KEY'] = 'AIzaSyCzNWn7vGs16hc1GJD2aFEzciGKfbt7pa4'
 
-app = Flask(__name__)
+# Configure the API key
+genai.configure(api_key=os.getenv('GOOGLE_API_KEY'))
 
-# Load pre-trained model and tokenizer
-model_path = "t5_model_epoch_40.pt"  # Path to your pre-trained model
-tokenizer_path = "t5_tokenizer"  # Path to your tokenizer
-model = T5ForConditionalGeneration.from_pretrained(model_path)
-tokenizer = T5Tokenizer.from_pretrained(tokenizer_path)
+# Initialize the GenerativeModel
+model = genai.GenerativeModel('gemini-pro')
+chat = model.start_chat()
 
-@app.route('/')
-def home():
-    return render_template('index2.html')  # Render the index.html template
+print("Welcome to StorageBot! How can I assist you today?")
+while True:
+    user_input = input("You: ")
 
-@app.route('/get_response', methods=['POST'])
-def get_response():
-    prompt = request.form['prompt']
-    input_text = "chat: " + prompt
-    input_ids = tokenizer.encode(input_text, return_tensors="pt")
+    # Send user input to Gemini and retrieve response
+    gemini_response = chat.send_message(user_input)
+    cleaned_response_text = gemini_response.text
 
-    # Generate response
-    with torch.no_grad():
-        outputs = model.generate(input_ids, max_length=50, num_return_sequences=1, early_stopping=True)
+    # Print Gemini-Nexus's response
+    print("Gemini:", cleaned_response_text)
 
-    response = tokenizer.decode(outputs[0], skip_special_tokens=True)
-    return response
-
-if __name__ == '__main__':
-    app.run(debug=True)
-    
+    if user_input.lower() == 'quit' or user_input.lower() == 'exit':
+        break
